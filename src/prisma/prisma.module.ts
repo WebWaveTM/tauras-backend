@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 
 import { AppConfigService } from '~/config/config.service';
 
+import { IsUniqueFieldConstraint } from './decorators/is-unique-field.decorator';
 import {
   BasePrismaService,
   PRISMA_SERVICE_INJECTION_TOKEN,
@@ -17,6 +18,7 @@ import {
       useFactory: (configService: AppConfigService) =>
         new BasePrismaService(configService).withExtensions(),
     },
+    IsUniqueFieldConstraint,
   ],
 })
 export class PrismaModule {}

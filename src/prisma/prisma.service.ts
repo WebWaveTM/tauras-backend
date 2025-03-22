@@ -1,6 +1,3 @@
-import type { TransactionHost } from '@nestjs-cls/transactional';
-import type { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-
 import {
   Injectable,
   Logger,
@@ -12,8 +9,6 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { AppConfigService } from '~/config/config.service';
 
 export type PrismaService = ReturnType<BasePrismaService['withExtensions']>;
-export type TXAdapter = TransactionalAdapterPrisma<PrismaService>;
-export type TXHost = TransactionHost<TXAdapter>;
 
 export const PRISMA_SERVICE_INJECTION_TOKEN = 'PrismaService';
 
@@ -69,8 +64,6 @@ export class BasePrismaService
   }
 
   withExtensions() {
-    return this.$extends({
-      result: {},
-    });
+    return this;
   }
 }

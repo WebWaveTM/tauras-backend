@@ -1,50 +1,33 @@
-import KeyvRedis from '@keyv/redis';
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import { CacheModule } from '@nestjs/cache-manager';
-import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import {
+  ClassSerializerInterceptor,
+  Module,
+  ValidationPipe,
+} from '@nestjs/common';
+import { APP_INTERCEPTOR, APP_PIPE, Reflector } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { randomUUID } from 'crypto';
-import Keyv from 'keyv';
 import { ClsModule } from 'nestjs-cls';
+import { randomUUID } from 'node:crypto';
 
 import { AppController } from './app.controller';
-import { CacheInterceptor } from './cache/cache.interceptor';
 import { AppConfigModule } from './config/config.module';
-import { AppConfigService } from './config/config.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { PRISMA_SERVICE_INJECTION_TOKEN } from './prisma/prisma.service';
+import { UserModule } from './user/user.module';
 
 @Module({
   controllers: [AppController],
   imports: [
     AppConfigModule,
     PrismaModule,
-    CacheModule.registerAsync({
-      inject: [AppConfigService],
-      isGlobal: true,
-      useFactory: (configService: AppConfigService) => {
-        const redisStore = new KeyvRedis(`${configService.get('REDIS_URL')}/0`);
-
-        const l1Cache = new Keyv({ namespace: 'l1cache', ttl: 1000 * 20 });
-
-        const l2Cache = new Keyv({
-          namespace: 'l2cache',
-          store: redisStore,
-          ttl: 1000 * 60 * 1,
-        });
-
-        return {
-          stores: [l1Cache, l2Cache],
-          ttl: 1000 * 20,
-        };
-      },
-    }),
+    UserModule,
     ThrottlerModule.forRoot([{ limit: 5, ttl: 1000 * 10 }]),
     ClsModule.forRoot({
       global: true,
       middleware: {
+        generateId: true,
+        idGenerator: () => randomUUID(),
         mount: true,
       },
       plugins: [
@@ -59,8 +42,23 @@ import { PRISMA_SERVICE_INJECTION_TOKEN } from './prisma/prisma.service';
   ],
   providers: [
     {
+      provide: APP_PIPE,
+      useFactory: () =>
+        new ValidationPipe({
+          skipMissingProperties: true,
+          skipUndefinedProperties: true,
+          transform: true,
+          whitelist: true,
+        }),
+    },
+    {
+      inject: [Reflector],
       provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
+      useFactory: (reflector: Reflector) =>
+        new ClassSerializerInterceptor(reflector, {
+          enableImplicitConversion: true,
+          strategy: 'excludeAll',
+        }),
     },
   ],
 })

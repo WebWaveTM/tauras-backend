@@ -14,6 +14,7 @@ export default tseslint.config(
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/interface-name-prefix': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      'perfectionist/sort-classes': 'off',
     },
-  },
+  }
 );
