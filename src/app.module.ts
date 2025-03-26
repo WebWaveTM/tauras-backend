@@ -12,6 +12,7 @@ import { ClsModule } from 'nestjs-cls';
 import { randomUUID } from 'node:crypto';
 
 import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
 import { AppConfigModule } from './config/config.module';
 import { DisciplineModule } from './discipline/discipline.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -21,6 +22,7 @@ import { UserModule } from './user/user.module';
 @Module({
   controllers: [AppController],
   imports: [
+    AuthModule,
     AppConfigModule,
     PrismaModule,
     UserModule,

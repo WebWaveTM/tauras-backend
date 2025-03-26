@@ -6,6 +6,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { type FindManyArgs, paginate } from '~/prisma/lib/paginate';
 import { type PrismaService } from '~/prisma/prisma.service';
+import { getHashedUser } from '~/user/lib/get-hashed-user';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,10 @@ export class UserService {
   ) {}
 
   async create(payload: Prisma.UserCreateInput) {
-    const user = await this.txHost.tx.user.create({ data: payload });
+    const hashedPayload = await getHashedUser(payload);
+    const user = await this.txHost.tx.user.create({
+      data: hashedPayload,
+    });
     this.logger.log(`Created user with id ${user.id}`, 'create');
     return user;
   }
@@ -35,6 +39,12 @@ export class UserService {
   async findOne(id: number) {
     const user = await this.txHost.tx.user.findUnique({ where: { id } });
     this.logger.log(`Found user with id ${id}`, 'findOne');
+    return user;
+  }
+
+  async findOneByEmail(email: string) {
+    const user = await this.txHost.tx.user.findUnique({ where: { email } });
+    this.logger.log(`Found user with id ${user?.email}`, 'findOneByEmail');
     return user;
   }
 
