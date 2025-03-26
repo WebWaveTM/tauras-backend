@@ -4,6 +4,7 @@ import {
   IsDate,
   IsEmail,
   IsEnum,
+  IsInt,
   IsOptional,
   IsString,
   IsStrongPassword,
@@ -40,4 +41,8 @@ export class CreateUserDto implements Prisma.UserCreateInput {
   @IsEnum(Role)
   @IsOptional()
   role?: Role;
+
+  @IsInt()
+  @IsOptional()
+  disciplineId?: number;
 }

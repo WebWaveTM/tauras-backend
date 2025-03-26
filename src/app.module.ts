@@ -6,12 +6,14 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { APP_INTERCEPTOR, APP_PIPE, Reflector } from '@nestjs/core';
+import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ClsModule } from 'nestjs-cls';
 import { randomUUID } from 'node:crypto';
 
 import { AppController } from './app.controller';
 import { AppConfigModule } from './config/config.module';
+import { DisciplineModule } from './discipline/discipline.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PRISMA_SERVICE_INJECTION_TOKEN } from './prisma/prisma.service';
 import { UserModule } from './user/user.module';
@@ -23,6 +25,7 @@ import { UserModule } from './user/user.module';
     PrismaModule,
     UserModule,
     ThrottlerModule.forRoot([{ limit: 5, ttl: 1000 * 10 }]),
+    TerminusModule,
     ClsModule.forRoot({
       global: true,
       middleware: {
@@ -39,6 +42,7 @@ import { UserModule } from './user/user.module';
         }),
       ],
     }),
+    DisciplineModule,
   ],
   providers: [
     {

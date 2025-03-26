@@ -23,6 +23,7 @@ async function bootstrap() {
   app.set('query parser', 'extended');
   app.enableCors();
   app.use(helmet());
+  app.enableShutdownHooks();
   app.setGlobalPrefix('api');
   app.enableVersioning({
     defaultVersion: '1',

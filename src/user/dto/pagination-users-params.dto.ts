@@ -1,6 +1,6 @@
 import { Prisma, Role } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsEnum, ValidateNested } from 'class-validator';
+import { IsEnum, IsInt, ValidateNested } from 'class-validator';
 
 import { DateTimeFilterDto } from '~/prisma/dto/date-time-filter.dto';
 import {
@@ -27,6 +27,12 @@ class UsersOrderByInputDto implements Prisma.UserOrderByWithRelationInput {
 
   @IsAscDesc()
   role?: Prisma.SortOrder;
+
+  @IsAscDesc()
+  createdAt?: Prisma.SortOrder;
+
+  @IsAscDesc()
+  updatedAt?: Prisma.SortOrder;
 }
 
 export class PaginationUserParams
@@ -38,6 +44,10 @@ export class PaginationUserParams
   @Type(() => DateTimeFilterDto)
   @ValidateNested()
   createdAt?: DateTimeFilterDto<'User'>;
+
+  @Type(() => DateTimeFilterDto)
+  @ValidateNested()
+  updatedAt?: DateTimeFilterDto<'User'>;
 
   @Type(() => DateTimeFilterDto)
   @ValidateNested()
@@ -58,6 +68,10 @@ export class PaginationUserParams
   @Type(() => StringFilterDto)
   @ValidateNested()
   patronymic?: StringFilterDto<'User'>;
+
+  @IsInt()
+  @Type(() => Number)
+  disciplineId?: number;
 
   @IsEnum(Role)
   role?: Role;

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   Param,
@@ -25,6 +26,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @HttpCode(HttpStatus.CREATED)
   @Post()
   async create(@Body() payload: CreateUserDto) {
     const user = await this.userService.create(payload);
@@ -34,7 +36,7 @@ export class UserController {
   @Get()
   async getMany(@Query() query: PaginationUserParams) {
     const paginationParams = convertQueryObject(query);
-    const user = await this.userService.findMany(paginationParams);
+    const user = await this.userService.findAll(paginationParams);
     return new PaginatedUsersDto(user);
   }
 
@@ -66,8 +68,8 @@ export class UserController {
   }
 
   @Delete('/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param() params: UserIdParamDto) {
-    const user = await this.userService.remove(params.id);
-    return new UserDto(user);
+    await this.userService.remove(params.id);
   }
 }

@@ -34,11 +34,11 @@ export class UserService {
 
   async findOne(id: number) {
     const user = await this.txHost.tx.user.findUnique({ where: { id } });
-    this.logger.log(`Found user with id ${id}`, 'getById');
+    this.logger.log(`Found user with id ${id}`, 'findOne');
     return user;
   }
 
-  async findMany(
+  async findAll(
     params?: FindManyArgs<
       Prisma.UserWhereInput,
       Prisma.UserOrderByWithRelationInput
@@ -50,8 +50,16 @@ export class UserService {
       Prisma.UserOrderByWithRelationInput
     >(this.txHost.tx, 'User', params);
 
-    this.logger.log(`Found ${users.data.length} users`, 'getMany');
+    this.logger.log(`Found ${users.data.length} users`, 'findAll');
     return users;
+  }
+
+  async remove(id: number) {
+    const user = await this.txHost.tx.user.delete({ where: { id } });
+
+    this.logger.log(`Deleted user with id ${id}`, 'remove');
+
+    return user;
   }
 
   async search(query?: string) {
@@ -95,13 +103,5 @@ export class UserService {
     );
 
     return results;
-  }
-
-  async remove(id: number) {
-    const user = await this.txHost.tx.user.delete({ where: { id } });
-
-    this.logger.log(`Deleted user with id ${id}`, 'remove');
-
-    return user;
   }
 }
