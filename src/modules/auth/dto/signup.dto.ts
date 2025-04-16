@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import normalizeEmail from 'normalize-email';
 
-import { IsUniqueField } from '~/prisma/decorators/is-unique-field.decorator';
+import { IsUniqueField } from '~/infrastructure/database/prisma/decorators/is-unique-field.decorator';
 
 import { SignUpPayload } from '../types/signup.payload';
 

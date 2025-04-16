@@ -7,11 +7,11 @@ import {
   PrismaHealthIndicator,
 } from '@nestjs/terminus';
 
-import { ExposeAllDto } from './lib/dto/expose-all.dto';
+import { ExposeAllDto } from './common/dto/expose-all.dto';
 import {
   PRISMA_SERVICE_INJECTION_TOKEN,
   type PrismaService,
-} from './prisma/prisma.service';
+} from './infrastructure/database/prisma/prisma.service';
 
 @Controller()
 export class AppController {

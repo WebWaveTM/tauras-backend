@@ -6,7 +6,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE, Reflector } from '@nestjs/core';
-import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -16,19 +15,21 @@ import { LoggerModule } from 'nestjs-pino';
 import { join } from 'path';
 
 import { AppController } from './app.controller';
-import { AuthModule } from './auth/auth.module';
-import { AccessTokenGuard } from './auth/guards/access-token.guard';
 import { AppConfigModule } from './config/config.module';
 import { AppConfigService } from './config/config.service';
-import { DisciplineModule } from './discipline/discipline.module';
-import { PrismaModule } from './prisma/prisma.module';
-import { PRISMA_SERVICE_INJECTION_TOKEN } from './prisma/prisma.service';
-import { RedisModule } from './redis/redis.module';
-import { UserModule } from './user/user.module';
+import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
+import { PRISMA_SERVICE_INJECTION_TOKEN } from './infrastructure/database/prisma/prisma.service';
+import { RedisModule } from './infrastructure/database/redis/redis.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { AccessTokenGuard } from './modules/auth/guards/access-token.guard';
+import { DisciplineModule } from './modules/discipline/discipline.module';
+import { SseModule } from './modules/sse/sse.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   controllers: [AppController],
   imports: [
+    SseModule,
     AppConfigModule,
     PrismaModule,
     UserModule,
@@ -36,12 +37,12 @@ import { UserModule } from './user/user.module';
     ThrottlerModule.forRoot([{ limit: 5, ttl: 1000 * 10 }]),
     TerminusModule,
     RedisModule,
-    DevtoolsModule.registerAsync({
-      inject: [AppConfigService],
-      useFactory: (configService: AppConfigService) => ({
-        http: configService.get('NODE_ENV') !== 'production',
-      }),
-    }),
+    // DevtoolsModule.registerAsync({
+    //   inject: [AppConfigService],
+    //   useFactory: (configService: AppConfigService) => ({
+    //     http: configService.get('NODE_ENV') !== 'production',
+    //   }),
+    // }),
     LoggerModule.forRootAsync({
       inject: [AppConfigService],
       useFactory: (configService: AppConfigService) => ({

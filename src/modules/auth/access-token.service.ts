@@ -5,8 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 
 import { AppConfigService } from '~/config/config.service';
-import { REDIS_CLIENT } from '~/redis/redis.module';
-import { UserService } from '~/user/user.service';
+import { REDIS_CLIENT } from '~/infrastructure/database/redis/redis.module';
+import { UserService } from '~/modules/user/user.service';
 
 import {
   BANNED_ACCESS_TOKEN_ID_REDIS_PREFIX,

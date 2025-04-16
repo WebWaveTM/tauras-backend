@@ -2,12 +2,12 @@ import { Prisma, Role } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, ValidateNested } from 'class-validator';
 
-import { DateTimeFilterDto } from '~/prisma/dto/date-time-filter.dto';
+import { DateTimeFilterDto } from '~/infrastructure/database/prisma/dto/date-time-filter.dto';
 import {
   IsAscDesc,
   withPaginationParams,
-} from '~/prisma/dto/pagination-params.dto';
-import { StringFilterDto } from '~/prisma/dto/string-filter.dto';
+} from '~/infrastructure/database/prisma/dto/pagination-params.dto';
+import { StringFilterDto } from '~/infrastructure/database/prisma/dto/string-filter.dto';
 
 class UsersOrderByInputDto implements Prisma.UserOrderByWithRelationInput {
   @IsAscDesc()

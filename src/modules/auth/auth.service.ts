@@ -3,7 +3,7 @@ import type { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapt
 import { Transactional } from '@nestjs-cls/transactional';
 import { Inject, Logger } from '@nestjs/common';
 
-import { UserService } from '~/user/user.service';
+import { UserService } from '~/modules/user/user.service';
 
 import type { TokenPayload, Tokens } from './const';
 import type { SignInPayload } from './types/signin.payload';

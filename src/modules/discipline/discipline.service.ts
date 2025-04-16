@@ -4,9 +4,12 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { Injectable, Logger } from '@nestjs/common';
 import { Discipline, type Prisma } from '@prisma/client';
 
-import type { PrismaService } from '~/prisma/prisma.service';
+import type { PrismaService } from '~/infrastructure/database/prisma/prisma.service';
 
-import { type FindManyArgs, paginate } from '~/prisma/lib/paginate';
+import {
+  type FindManyArgs,
+  paginate,
+} from '~/infrastructure/database/prisma/lib/paginate';
 
 @Injectable()
 export class DisciplineService {

@@ -12,7 +12,7 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { convertQueryObject } from '~/prisma/lib/convert-query-object';
+import { convertQueryObject } from '~/infrastructure/database/prisma/lib/convert-query-object';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';

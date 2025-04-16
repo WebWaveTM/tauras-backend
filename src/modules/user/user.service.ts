@@ -4,9 +4,12 @@ import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
 import { Injectable, Logger } from '@nestjs/common';
 
-import { type FindManyArgs, paginate } from '~/prisma/lib/paginate';
-import { type PrismaService } from '~/prisma/prisma.service';
-import { getHashedUser } from '~/user/lib/get-hashed-user';
+import {
+  type FindManyArgs,
+  paginate,
+} from '~/infrastructure/database/prisma/lib/paginate';
+import { type PrismaService } from '~/infrastructure/database/prisma/prisma.service';
+import { getHashedUser } from '~/modules/user/lib/get-hashed-user';
 
 @Injectable()
 export class UserService {

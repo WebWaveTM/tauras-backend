@@ -7,7 +7,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { randomUUID } from 'crypto';
 
 import { AppConfigService } from '~/config/config.service';
-import { PrismaService } from '~/prisma/prisma.service';
+import { PrismaService } from '~/infrastructure/database/prisma/prisma.service';
 
 import {
   getRefreshSignOptions,

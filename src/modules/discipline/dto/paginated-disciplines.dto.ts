@@ -1,4 +1,4 @@
-import { withPagination } from '~/prisma/dto/paginated.dto';
+import { withPagination } from '~/infrastructure/database/prisma/dto/paginated.dto';
 
 import { DisciplineDto } from './discipline.dto';
 
