@@ -19,32 +19,44 @@ export class UserService {
   ) {}
 
   async create(payload: Prisma.UserCreateInput) {
+    this.logger.log('Creating a new user');
     const hashedPayload = await getHashedUser(payload);
     const user = await this.txHost.tx.user.create({
       data: hashedPayload,
     });
-    this.logger.log(`Created user with id ${user.id}`, 'create');
+    this.logger.log(`User created with ID: ${user.id}`);
     return user;
   }
 
   async update(id: number, payload: Prisma.UserUpdateInput) {
+    this.logger.log(`Updating user with ID: ${id}`);
     const user = await this.txHost.tx.user.update({
       data: payload,
       where: { id },
     });
-    this.logger.log(`Updated user with id ${id}`, 'update');
+    this.logger.log(`User with ID: ${id} updated successfully`);
     return user;
   }
 
   async findOne(id: number) {
+    this.logger.log(`Finding user with ID: ${id}`);
     const user = await this.txHost.tx.user.findUnique({ where: { id } });
-    this.logger.log(`Found user with id ${id}`, 'findOne');
+    if (!user) {
+      this.logger.warn(`User with ID: ${id} not found`);
+    } else {
+      this.logger.log(`User with ID: ${id} found`);
+    }
     return user;
   }
 
   async findOneByEmail(email: string) {
+    this.logger.log(`Finding user with email: ${email}`);
     const user = await this.txHost.tx.user.findUnique({ where: { email } });
-    this.logger.log(`Found user with id ${user?.email}`, 'findOneByEmail');
+    if (!user) {
+      this.logger.warn(`User with email: ${email} not found`);
+    } else {
+      this.logger.log(`User with email: ${email} found`);
+    }
     return user;
   }
 
@@ -54,28 +66,29 @@ export class UserService {
       Prisma.UserOrderByWithRelationInput
     >
   ) {
+    this.logger.log('Fetching all users with pagination');
     const users = await paginate<
       User,
       Prisma.UserWhereInput,
       Prisma.UserOrderByWithRelationInput
     >(this.txHost.tx, 'User', params);
 
-    this.logger.log(`Found ${users.data.length} users`, 'findAll');
+    this.logger.log(`Found ${users.data.length} users`);
     return users;
   }
 
   async remove(id: number) {
+    this.logger.log(`Removing user with ID: ${id}`);
     const user = await this.txHost.tx.user.delete({ where: { id } });
-
-    this.logger.log(`Deleted user with id ${id}`, 'remove');
-
+    this.logger.log(`User with ID: ${id} removed successfully`);
     return user;
   }
 
   async search(query?: string) {
     const modifiedQuery = `${query}*`;
+    this.logger.log(`Searching users with query: ${modifiedQuery}`);
     if (!query) {
-      this.logger.log(`Found 0 users with query ${modifiedQuery}`, 'search');
+      this.logger.log(`Found 0 users with query ${modifiedQuery}`);
       return [];
     }
     const results = await this.txHost.tx.user.findMany({
@@ -106,12 +119,9 @@ export class UserService {
         },
       },
     });
-
     this.logger.log(
-      `Found ${results.length} users with query ${modifiedQuery}`,
-      'search'
+      `Found ${results.length} users with query: ${modifiedQuery}`
     );
-
     return results;
   }
 }

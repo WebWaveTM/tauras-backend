@@ -24,7 +24,6 @@ export class CacheInterceptor implements NestInterceptor {
   ) {}
   async intercept(context: ExecutionContext, next: CallHandler) {
     if (getIsCacheDisabled(context, this.reflector)) {
-      console.log('cache disabled');
       return next.handle();
     }
 
