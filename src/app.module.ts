@@ -1,11 +1,7 @@
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import {
-  ClassSerializerInterceptor,
-  Module,
-  ValidationPipe,
-} from '@nestjs/common';
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE, Reflector } from '@nestjs/core';
+import { Module, ValidationPipe } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -20,15 +16,18 @@ import { AppConfigService } from './config/config.service';
 import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 import { PRISMA_SERVICE_INJECTION_TOKEN } from './infrastructure/database/prisma/prisma.service';
 import { RedisModule } from './infrastructure/database/redis/redis.module';
+import { SseInterceptor } from './infrastructure/sse/sse.interceptor';
+import { SseModule } from './infrastructure/sse/sse.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AccessTokenGuard } from './modules/auth/guards/access-token.guard';
 import { DisciplineModule } from './modules/discipline/discipline.module';
-import { SseModule } from './modules/sse/sse.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
   controllers: [AppController],
   imports: [
+    NotificationModule,
     SseModule,
     AppConfigModule,
     PrismaModule,
@@ -108,14 +107,10 @@ import { UserModule } from './modules/user/user.module';
         }),
     },
     {
-      inject: [Reflector],
       provide: APP_INTERCEPTOR,
-      useFactory: (reflector: Reflector) =>
-        new ClassSerializerInterceptor(reflector, {
-          enableImplicitConversion: true,
-          strategy: 'excludeAll',
-        }),
+      useClass: SseInterceptor,
     },
+
     {
       provide: APP_GUARD,
       useClass: AccessTokenGuard,
