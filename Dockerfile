@@ -1,4 +1,4 @@
-FROM node:lts-slim AS development
+FROM node:lts AS development
 WORKDIR /usr/app
 COPY ./ ./
 RUN npm install
@@ -17,7 +17,7 @@ RUN npm ci
 RUN npm run build
 
 
-FROM node:lts-slim AS production
+FROM node:lts AS production
 WORKDIR /usr/app
 COPY --from=build /usr/app/dist ./
 COPY --from=build /usr/app/prisma ./prisma

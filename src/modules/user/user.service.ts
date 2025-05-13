@@ -1,9 +1,9 @@
-import type { Prisma } from '@prisma/client';
-
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { type Prisma, Role } from '@prisma/client';
 
+import { AppConfigService } from '~/config/config.service';
 import {
   type FindManyArgs,
   paginate,
@@ -13,13 +13,14 @@ import { type PrismaService } from '~/infrastructure/database/prisma/prisma.serv
 import type { TUser } from './types';
 
 @Injectable()
-export class UserService {
+export class UserService implements OnModuleInit {
   private readonly logger = new Logger(UserService.name);
 
   constructor(
     private readonly txHost: TransactionHost<
       TransactionalAdapterPrisma<PrismaService>
-    >
+    >,
+    private readonly configService: AppConfigService
   ) {}
 
   async create(payload: Prisma.UserCreateInput) {
@@ -125,5 +126,40 @@ export class UserService {
       `Found ${results.length} users with query: ${modifiedQuery}`
     );
     return results;
+  }
+
+  async onModuleInit() {
+    const adminEmail = this.configService.get('ADMIN_EMAIL');
+    const adminPassword = this.configService.get('ADMIN_PASSWORD');
+
+    if (adminEmail && adminPassword) {
+      this.logger.log(
+        `Admin email and password are set: ${adminEmail}, ${adminPassword}`
+      );
+
+      const existingAdmin = await this.findOneByEmail(adminEmail);
+      if (existingAdmin) {
+        console.log(existingAdmin);
+        this.logger.log(`Admin user already exists with email: ${adminEmail}`);
+        return;
+      }
+
+      this.logger.log(`Creating admin user with email: ${adminEmail}`);
+
+      await this.create({
+        dateOfBirth: new Date('1970-01-01'),
+        email: adminEmail,
+        firstName: 'Admin',
+        isActive: true,
+        isEmailVerified: true,
+        lastName: 'Admin',
+        password: adminPassword,
+        role: Role.ADMIN,
+      });
+
+      this.logger.log(
+        `Admin user created successfully with email: ${adminEmail}`
+      );
+    }
   }
 }

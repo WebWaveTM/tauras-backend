@@ -68,11 +68,15 @@ export class BasePrismaService
     return this.$extends({
       query: {
         user: {
-          update: async ({ args }) => {
+          $allOperations: async ({ args, operation, query }) => {
+            if (operation !== 'create' && operation !== 'update') {
+              return query(args);
+            }
+
             const { password } = args.data;
 
             if (!password || typeof password !== 'string') {
-              return args;
+              return query(args);
             }
 
             const hashedPassword = await bcrypt.hash(
@@ -86,7 +90,7 @@ export class BasePrismaService
                 password: hashedPassword,
               },
             };
-            return hashedArgs;
+            return query(hashedArgs);
           },
         },
       },
