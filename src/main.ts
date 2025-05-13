@@ -17,19 +17,14 @@ async function bootstrap() {
   });
 
   const logger = app.get(Logger);
+  const config = app.get<AppConfigService>(AppConfigService);
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useLogger(logger);
   app.set('query parser', 'extended');
   app.enableCors({
     credentials: true,
-    origin: (origin, callback) => {
-      if (!origin || origin === 'http://localhost:5173') {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: config.get('CORS_ORIGIN'),
   });
   app.use(helmet());
   app.use(cookieParser());
@@ -41,7 +36,6 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
 
-  const config = app.get<AppConfigService>(AppConfigService);
   const port = config.get('APP_PORT');
   await app.listen(port);
 

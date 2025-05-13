@@ -1,0 +1,11 @@
+.dockerignore
+.git
+.gitignore
+.vscode
+logs
+.env*
+.eslintignore
+.prettierrc
+docker-compose*.yml
+Dockerfile*
+*.md

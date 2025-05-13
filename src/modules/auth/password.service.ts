@@ -33,7 +33,7 @@ export class PasswordService {
     return token;
   }
 
-  async requestPasswordReset(email: string): boolean {
+  async requestPasswordReset(email: string): Promise<boolean> {
     this.logger.log(`Requesting password reset for ${email}`);
     const user = await this.userService.findOneByEmail(email);
 

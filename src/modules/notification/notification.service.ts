@@ -30,9 +30,9 @@ export class NotificationService {
     }
 
     if (Array.isArray(strategy)) {
-      strategy.forEach((s) => s.send({ ...notification, recipient: userId }));
+      strategy.forEach((s) => s.send(userId, { ...notification }));
     } else {
-      strategy.send({ ...notification, recipient: userId });
+      strategy.send(userId, { ...notification });
     }
   }
 

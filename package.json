@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prebuild": "npm run prisma:generate",
     "build": "nest build",
     "postbuild": "npm run build:templates",
     "build:templates": "ts-node ./scripts/compileTemplates.ts",
@@ -13,7 +14,6 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
-    "prestart": "npm run prisma:generate",
     "start": "nest start --watch",
     "start:dev:docker": "docker compose -f docker-compose.dev.yml --env-file .env.dev up",
     "start:dev:docker:build": "docker compose -f docker-compose.dev.yml --env-file .env.dev up --build",

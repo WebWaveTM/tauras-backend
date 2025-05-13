@@ -56,7 +56,7 @@ export class DisciplineService {
       Discipline,
       Prisma.DisciplineWhereInput,
       Prisma.DisciplineOrderByWithRelationInput
-    >(this.txHost.tx, 'Discipline', params);
+    >(this.txHost, 'Discipline', params);
 
     this.logger.log(`Found ${disciplines.data.length} disciplines`, 'findAll');
     return disciplines;

@@ -28,6 +28,12 @@ export const ConfigSchema = z.object({
   ACCESS_PUBLIC_KEY: z.string().transform(read),
   APP_PORT: portSchema,
   BASE_URL: z.string().url(),
+  CORS_ORIGIN: z
+    .string()
+    .transform((val) => val.split(',').map((item) => item.trim()))
+    .pipe(z.array(z.string().url()))
+    .optional()
+    .default('http://localhost:5173'),
   DATABASE_URL: z.string().url(),
   DB_HOST: z.string(),
   DB_NAME: z.string(),

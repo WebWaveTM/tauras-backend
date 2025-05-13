@@ -1,21 +1,25 @@
-FROM node:22 AS setup
+FROM node:lts-slim AS development
+WORKDIR /usr/app
+COPY ./ ./
+RUN npm install
+RUN npm run build
+CMD [ "npm", "run", "start" ]
+
+FROM node:lts-slim AS build
 WORKDIR /usr/app
 COPY ./package*.json ./
-RUN npm install
-COPY . .
-
-FROM node:22 AS development
-WORKDIR /usr/app
-COPY --from=setup /usr/app ./
-CMD ["npm", "run", "start"]
-
-FROM node:22 AS build
-WORKDIR /usr/app
-COPY --from=setup /usr/app ./
+COPY ./tsconfig*.json ./
+COPY ./src ./src
+COPY ./scripts ./scripts
+COPY ./prisma ./prisma
+COPY ./nest-cli.json ./nest-cli.json
+RUN npm ci
 RUN npm run build
 
-FROM node:22-alpine AS production
+
+FROM node:lts-slim AS production
 WORKDIR /usr/app
 COPY --from=build /usr/app/dist ./
-COPY --from=build /usr/app/node_modules ./
-CMD [ "node", "dist/main" ]
+COPY --from=build /usr/app/prisma ./prisma
+COPY --from=build /usr/app/node_modules ./node_modules
+CMD ["node", "main"]
