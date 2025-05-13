@@ -30,7 +30,10 @@ declare global {
       disciplineId: null | number;
       email: string;
       firstName: string;
+      fullName: string;
       id: number;
+      isActive: boolean;
+      isEmailVerified: boolean;
       lastName: string;
       password: null | string;
       patronymic: null | string;

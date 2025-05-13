@@ -1,13 +1,10 @@
-export interface NotificationPayload<T extends Record<string, unknown>> {
-  content: string;
-  metadata?: T;
-  recipient: string;
-  subject?: string;
-}
+import type { NotificationPayload } from '../notification.interface';
 
 export interface NotificationStrategy {
+  broadcast(userIds: number[], payload: NotificationPayload): Promise<boolean>;
   canHandle(type: string): boolean;
-  send<T extends Record<string, unknown>>(
-    payload: NotificationPayload<T>
-  ): Promise<boolean>;
+  send(userId: number, payload: NotificationPayload): Promise<boolean>;
+  strategyName: NotificationStrategyType;
 }
+
+export type NotificationStrategyType = 'sse';

@@ -4,7 +4,8 @@ import {
   type OnModuleDestroy,
   type OnModuleInit,
 } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, type User } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 import { AppConfigService } from '~/config/config.service';
 
@@ -22,7 +23,7 @@ export class BasePrismaService
 {
   private readonly logger = new Logger(PRISMA_SERVICE_INJECTION_TOKEN);
 
-  constructor(configService: AppConfigService) {
+  constructor(private readonly configService: AppConfigService) {
     super({
       log:
         configService.get('NODE_ENV') === 'development'
@@ -64,6 +65,44 @@ export class BasePrismaService
   }
 
   withExtensions() {
-    return this;
+    return this.$extends({
+      query: {
+        user: {
+          update: async ({ args }) => {
+            const { password } = args.data;
+
+            if (!password || typeof password !== 'string') {
+              return args;
+            }
+
+            const hashedPassword = await bcrypt.hash(
+              password,
+              this.configService.get('PASSWORD_HASH_SALT')
+            );
+            const hashedArgs = {
+              ...args,
+              data: {
+                ...args.data,
+                password: hashedPassword,
+              },
+            };
+            return hashedArgs;
+          },
+        },
+      },
+      result: {
+        user: {
+          fullName: {
+            compute: (user: User) =>
+              `${user.lastName} ${user.firstName} ${user.patronymic ?? ''}`.trim(),
+            needs: {
+              firstName: true,
+              lastName: true,
+              patronymic: true,
+            },
+          },
+        },
+      },
+    });
   }
 }

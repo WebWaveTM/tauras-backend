@@ -14,6 +14,12 @@ import {
 
 import { convertQueryObject } from '~/infrastructure/database/prisma/lib/convert-query-object';
 
+import type { UpdateUserDto } from './dto/update-user.dto';
+import type { TUser } from './types';
+
+import { AllowInactive } from '../auth/decorators/allow-inactive.decorator';
+import { AllowUnverified } from '../auth/decorators/allow-unverified.decorator';
+import { User } from '../auth/decorators/user.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { PaginationUserParams } from './dto/pagination-users-params.dto';
@@ -46,6 +52,21 @@ export class UserController {
     return users.map((user) => new UserDto(user));
   }
 
+  @AllowInactive()
+  @AllowUnverified()
+  @Get('/me')
+  async getMe(@User() user: TUser) {
+    return new UserDto(user);
+  }
+
+  @AllowInactive()
+  @AllowUnverified()
+  @Patch('/me')
+  async updateMe(@User() user: TUser, @Body() payload: UpdateUserDto) {
+    const updatedUser = await this.userService.update(user.id, payload);
+    return new UserDto(updatedUser);
+  }
+
   @Get('/:id')
   async getOne(@Param() params: UserIdParamDto) {
     const user = await this.userService.findOne(params.id);
@@ -61,7 +82,7 @@ export class UserController {
   @Patch('/:id')
   async update(
     @Param() params: UserIdParamDto,
-    @Body() payload: CreateUserDto
+    @Body() payload: UpdateUserDto
   ) {
     const user = await this.userService.update(params.id, payload);
     return new UserDto(user);

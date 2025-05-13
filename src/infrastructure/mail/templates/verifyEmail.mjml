@@ -1,0 +1,33 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="20px" font-weight="bold">
+          Подтвердите ваш адрес электронной почты
+        </mj-text>
+        <mj-text>
+          Здравствуйте, <%= it.name %><br />
+          Пожалуйста, используйте код ниже для подтверждения вашего адреса
+          электронной почты:
+        </mj-text>
+        <mj-text font-size="24px" color="#2d8cf0" font-weight="bold">
+          <%= it.code %>
+        </mj-text>
+        <mj-text> Или нажмите на кнопку ниже для подтверждения: </mj-text>
+        <mj-button
+          href="<%= it.link %>"
+          background-color="#2d8cf0"
+          color="#ffffff"
+        >
+          Подтвердить email
+        </mj-button>
+        <mj-text font-size="12px" color="#888888">
+          Время действия кода - 10 минут.
+        </mj-text>
+        <mj-text font-size="12px" color="#888888">
+          Если вы не запрашивали код, просто проигнорируйте это письмо.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

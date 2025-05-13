@@ -2,6 +2,7 @@ import type { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapt
 
 import { Transactional } from '@nestjs-cls/transactional';
 import { Inject, Logger } from '@nestjs/common';
+import bcrypt from 'bcrypt';
 
 import { UserService } from '~/modules/user/user.service';
 
@@ -65,8 +66,20 @@ export class AuthService {
   async signin(payload: SignInPayload): Promise<Tokens> {
     this.logger.log('Logging in user');
     const user = await this.userService.findOneByEmail(payload.email);
+
     if (!user) {
       this.logger.warn(`User not found with email: ${payload.email}`);
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      payload.password,
+      user.password
+    );
+    if (!isPasswordValid) {
+      this.logger.warn(
+        `Invalid password for user with email: ${payload.email}`
+      );
       return null;
     }
 

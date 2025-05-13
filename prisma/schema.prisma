@@ -9,20 +9,22 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  firstName    String         @map("first_name")
-  lastName     String         @map("last_name")
-  patronymic   String?
-  dateOfBirth  DateTime       @map("date_of_birth") @db.Date
-  role         Role           @default(TEACHER)
-  discipline   Discipline?    @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
-  disciplineId Int?           @map("discipline_id")
-  avatar       String?
-  password     String?
-  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamp
-  updatedAt    DateTime       @updatedAt @map("updated_at") @db.Timestamp
-  RefreshToken RefreshToken[]
+  id              Int            @id @default(autoincrement())
+  email           String         @unique
+  firstName       String         @map("first_name")
+  lastName        String         @map("last_name")
+  patronymic      String?
+  dateOfBirth     DateTime       @map("date_of_birth") @db.Date
+  role            Role           @default(TEACHER)
+  discipline      Discipline?    @relation(fields: [disciplineId], references: [id], onDelete: SetNull)
+  disciplineId    Int?           @map("discipline_id")
+  avatar          String?
+  password        String?
+  isEmailVerified Boolean        @default(false) @map("is_email_verified")
+  isActive        Boolean        @default(false) @map("is_active")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamp
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamp
+  RefreshToken    RefreshToken[]
 
   @@map("users")
 }
@@ -52,4 +54,5 @@ model Discipline {
 enum Role {
   TEACHER
   VICE_PRINCIPAL
+  ADMIN
 }

@@ -12,6 +12,8 @@ import {
   PRISMA_SERVICE_INJECTION_TOKEN,
   type PrismaService,
 } from './infrastructure/database/prisma/prisma.service';
+import { AllowInactive } from './modules/auth/decorators/allow-inactive.decorator';
+import { PublicRoute } from './modules/auth/decorators/public-route.decorator';
 
 @Controller()
 export class AppController {
@@ -26,6 +28,7 @@ export class AppController {
 
   @Get('/health')
   @HealthCheck()
+  @PublicRoute()
   async check() {
     const healthCheckResult = await this.healthCheckService.check([
       () =>
@@ -40,5 +43,11 @@ export class AppController {
     ]);
 
     return new ExposeAllDto(healthCheckResult);
+  }
+
+  @AllowInactive()
+  @Get('/test')
+  test() {
+    return 'test';
   }
 }

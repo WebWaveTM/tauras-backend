@@ -14,7 +14,6 @@ services:
     volumes:
       - ./:/usr/app
   postgres:
-    container_name: db
     image: postgres:16-alpine
     env_file:
       - .env

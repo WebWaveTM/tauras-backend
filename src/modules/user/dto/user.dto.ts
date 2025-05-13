@@ -1,7 +1,9 @@
-import { Discipline, Role, User } from '@prisma/client';
+import { Discipline, Role } from '@prisma/client';
 import { Expose, Transform } from 'class-transformer';
 
-export class UserDto implements Partial<User> {
+import type { TUser } from '../types';
+
+export class UserDto implements Partial<TUser> {
   @Expose()
   id: number;
 
@@ -13,6 +15,9 @@ export class UserDto implements Partial<User> {
 
   @Expose()
   firstName: string;
+
+  @Expose()
+  fullName: string;
 
   @Expose()
   patronymic?: string;
@@ -35,6 +40,12 @@ export class UserDto implements Partial<User> {
 
   @Expose()
   updatedAt: Date;
+
+  @Expose()
+  isActive: boolean;
+
+  @Expose()
+  isEmailVerified: boolean;
 
   constructor(partial: Partial<UserDto>) {
     Object.assign(this, partial);

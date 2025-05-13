@@ -1,4 +1,5 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -17,6 +18,7 @@ export class AccessTokenStrategy extends PassportStrategy(
 
   constructor(
     private readonly accessTokenService: AccessTokenService,
+    private readonly reflector: Reflector,
     configService: AppConfigService
   ) {
     super({
@@ -25,15 +27,16 @@ export class AccessTokenStrategy extends PassportStrategy(
       ignoreExpiration: false,
       issuer: configService.get('JWT_ISSUER'),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      passReqToCallback: true, // Pass request to callback
+      passReqToCallback: true,
       secretOrKey: configService.get('ACCESS_PUBLIC_KEY'),
     });
   }
 
   async validate(req: Request, payload: TokenPayload) {
     const user = await this.accessTokenService.validate(payload);
+
     if (!user) {
-      throw new UnauthorizedException('Invalid access token');
+      return false;
     }
 
     req.accessToken = payload;

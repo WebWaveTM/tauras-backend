@@ -6,6 +6,8 @@ import { Strategy } from 'passport-jwt';
 
 import { AppConfigService } from '~/config/config.service';
 
+import type { UnauthorizedExceptionPayload } from '../types/exceptions.types';
+
 import {
   REFRESH_TOKEN_COOKIE,
   REFRESH_TOKEN_STRATEGY_NAME,
@@ -35,7 +37,10 @@ export class RefreshTokenStrategy extends PassportStrategy(
   async validate(payload: TokenPayload) {
     const refreshToken = await this.refreshTokenService.validate(payload);
     if (!refreshToken) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException({
+        message: 'Invalid refresh token',
+        type: 'invalid_token',
+      } satisfies UnauthorizedExceptionPayload);
     }
 
     return payload;

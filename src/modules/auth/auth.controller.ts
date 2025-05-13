@@ -1,34 +1,48 @@
 import type { Response } from 'express';
 
+import { Transactional } from '@nestjs-cls/transactional';
 import {
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Post,
+  Query,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 
 import { AppConfigService } from '~/config/config.service';
 
+import type { TUser } from '../user/types';
+import type { UnauthorizedExceptionPayload } from './types/exceptions.types';
+
 import { AccessTokenService } from './access-token.service';
 import { AuthService } from './auth.service';
 import { REFRESH_TOKEN_COOKIE, type TokenPayload } from './const';
-import { AccessPayload } from './decorators/access-payload';
+import { AccessPayload } from './decorators/access-payload.decorator';
+import { AllowInactive } from './decorators/allow-inactive.decorator';
+import { AllowUnverified } from './decorators/allow-unverified.decorator';
 import { PublicRoute } from './decorators/public-route.decorator';
 import { RefreshPayload } from './decorators/refresh-payload.decorator';
+import { User } from './decorators/user.decorator';
+import { NextResendDateDto } from './dto/next-resend-date.dto';
 import { SignInDto } from './dto/signin.dto';
 import { SignUpDto } from './dto/signup.dto';
 import { TokensDto } from './dto/tokens.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { EmailService } from './email.service';
 import { RefreshTokenGuard } from './guards/refresh-token.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly emailService: EmailService,
     private readonly accessTokenService: AccessTokenService,
     private readonly configService: AppConfigService
   ) {}
@@ -58,6 +72,7 @@ export class AuthController {
 
   @Get('/refresh')
   @PublicRoute()
+  @Transactional()
   @UseGuards(RefreshTokenGuard)
   async refresh(
     @Res({ passthrough: true }) res: Response,
@@ -71,11 +86,18 @@ export class AuthController {
 
   @Post('/signin')
   @PublicRoute()
+  @Transactional()
   async signin(
     @Body() body: SignInDto,
     @Res({ passthrough: true }) res: Response
   ) {
     const tokens = await this.authService.signin(body);
+    if (!tokens) {
+      throw new UnauthorizedException({
+        message: 'Invalid credentials',
+        type: 'invalid_credentials',
+      } satisfies UnauthorizedExceptionPayload);
+    }
     this.setCookieRefreshToken(res, tokens.refreshToken);
 
     return new TokensDto(tokens);
@@ -83,11 +105,17 @@ export class AuthController {
 
   @Post('/signup')
   @PublicRoute()
+  @Transactional()
   async signup(
     @Body() body: SignUpDto,
     @Res({ passthrough: true }) res: Response
   ) {
     const tokens = await this.authService.signup(body);
+    await this.emailService.requestEmailVerification(
+      body.email,
+      `${body.firstName} ${body.lastName}`
+    );
+
     this.setCookieRefreshToken(res, tokens.refreshToken);
 
     return new TokensDto(tokens);
@@ -95,6 +123,7 @@ export class AuthController {
 
   @Get('/signout')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Transactional()
   @UseGuards(RefreshTokenGuard)
   async signout(
     @Res({ passthrough: true }) res: Response,
@@ -105,11 +134,6 @@ export class AuthController {
     this.clearCookieRefreshToken(res);
   }
 
-  // @Get('/test')
-  // test() {
-  //   return 'test';
-  // }
-
   async forgotPassword() {
     return 'forgot password';
   }
@@ -118,11 +142,54 @@ export class AuthController {
     return 'reset password';
   }
 
-  async sendVerificationEmail() {
-    return 'send verification email';
+  @AllowInactive()
+  @AllowUnverified()
+  @Get('/send-verification-email')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async sendVerificationEmail(@User() user: TUser) {
+    const isRequestAllowed = await this.emailService.isRequestAllowed(
+      user.email
+    );
+
+    if (!isRequestAllowed) {
+      throw new HttpException(
+        'Request not allowed',
+        HttpStatus.TOO_MANY_REQUESTS
+      );
+    }
+
+    await this.emailService.requestEmailVerification(user.email, user.fullName);
   }
 
-  async verifyEmail() {
-    return 'verify email';
+  @AllowInactive()
+  @AllowUnverified()
+  @Get('/verify-email')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async verifyEmail(@Query() query: VerifyEmailDto, @User() user: TUser) {
+    const isVerified = await this.emailService.verifyEmail(
+      user.id,
+      user.email,
+      query.code
+    );
+
+    if (!isVerified) {
+      throw new HttpException(
+        'Invalid verification code',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+  @AllowInactive()
+  @AllowUnverified()
+  @Get('/next-resend-date')
+  async getNextResendDate(@User() user: TUser) {
+    const nextResendDate = await this.emailService.getNextResendDate(
+      user.email
+    );
+
+    return new NextResendDateDto({
+      nextResendDate,
+    });
   }
 }

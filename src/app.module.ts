@@ -1,7 +1,11 @@
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
-import { Module, ValidationPipe } from '@nestjs/common';
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import {
+  ClassSerializerInterceptor,
+  Module,
+  ValidationPipe,
+} from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE, Reflector } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -16,6 +20,7 @@ import { AppConfigService } from './config/config.service';
 import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 import { PRISMA_SERVICE_INJECTION_TOKEN } from './infrastructure/database/prisma/prisma.service';
 import { RedisModule } from './infrastructure/database/redis/redis.module';
+import { MailModule } from './infrastructure/mail/mail.module';
 import { SseInterceptor } from './infrastructure/sse/sse.interceptor';
 import { SseModule } from './infrastructure/sse/sse.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -36,6 +41,7 @@ import { UserModule } from './modules/user/user.module';
     ThrottlerModule.forRoot([{ limit: 5, ttl: 1000 * 10 }]),
     TerminusModule,
     RedisModule,
+    MailModule,
     // DevtoolsModule.registerAsync({
     //   inject: [AppConfigService],
     //   useFactory: (configService: AppConfigService) => ({
@@ -96,6 +102,16 @@ import { UserModule } from './modules/user/user.module';
     ScheduleModule.forRoot(),
   ],
   providers: [
+    {
+      inject: [Reflector],
+      provide: APP_INTERCEPTOR,
+      useFactory: (reflector: Reflector) =>
+        new ClassSerializerInterceptor(reflector, {
+          enableImplicitConversion: true,
+          excludeExtraneousValues: true,
+          strategy: 'excludeAll',
+        }),
+    },
     {
       provide: APP_PIPE,
       useFactory: () =>

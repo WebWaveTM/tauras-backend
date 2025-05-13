@@ -1,4 +1,4 @@
-import type { Prisma, User } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 import { TransactionHost } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';
@@ -9,7 +9,8 @@ import {
   paginate,
 } from '~/infrastructure/database/prisma/lib/paginate';
 import { type PrismaService } from '~/infrastructure/database/prisma/prisma.service';
-import { getHashedUser } from '~/modules/user/lib/get-hashed-user';
+
+import type { TUser } from './types';
 
 @Injectable()
 export class UserService {
@@ -23,9 +24,8 @@ export class UserService {
 
   async create(payload: Prisma.UserCreateInput) {
     this.logger.log('Creating a new user');
-    const hashedPayload = await getHashedUser(payload);
     const user = await this.txHost.tx.user.create({
-      data: hashedPayload,
+      data: payload,
     });
     this.logger.log(`User created with ID: ${user.id}`);
     return user;
@@ -71,11 +71,10 @@ export class UserService {
   ) {
     this.logger.log('Fetching all users with pagination');
     const users = await paginate<
-      User,
+      TUser,
       Prisma.UserWhereInput,
       Prisma.UserOrderByWithRelationInput
-    >(this.txHost.tx, 'User', params);
-
+    >(this.txHost, 'User', params);
     this.logger.log(`Found ${users.data.length} users`);
     return users;
   }
