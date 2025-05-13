@@ -21,7 +21,16 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useLogger(logger);
   app.set('query parser', 'extended');
-  // app.enableCors();
+  app.enableCors({
+    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin || origin === 'http://localhost:5173') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+  });
   app.use(helmet());
   app.use(cookieParser());
 
