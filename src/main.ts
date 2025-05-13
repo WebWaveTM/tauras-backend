@@ -21,7 +21,7 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useLogger(logger);
   app.set('query parser', 'extended');
-  app.enableCors();
+  // app.enableCors();
   app.use(helmet());
   app.use(cookieParser());
 

@@ -17,4 +17,5 @@ RUN npm run build
 FROM node:22-alpine AS production
 WORKDIR /usr/app
 COPY --from=build /usr/app/dist ./
+COPY --from=build /usr/app/node_modules ./
 CMD [ "node", "dist/main" ]

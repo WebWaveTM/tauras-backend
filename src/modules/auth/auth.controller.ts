@@ -134,13 +134,13 @@ export class AuthController {
     this.clearCookieRefreshToken(res);
   }
 
-  async forgotPassword() {
-    return 'forgot password';
-  }
+  // async forgotPassword() {
+  //   return 'forgot password';
+  // }
 
-  async resetPassword() {
-    return 'reset password';
-  }
+  // async resetPassword() {
+  //   return 'reset password';
+  // }
 
   @AllowInactive()
   @AllowUnverified()
