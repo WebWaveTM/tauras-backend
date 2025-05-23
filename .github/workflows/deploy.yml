@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,23 +18,53 @@ jobs:
       - name: Build Docker image
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
+            --platform linux/amd64 \
             --target production \
             -t tauras-backend:latest \
+            --load \
             .
 
-      - name: Push Docker image to VPS
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "docker pull tauras-backend:latest || true"
+      - name: Save Docker image to tar
+        run: docker save tauras-backend:latest -o tauras-backend.tar
 
-      - name: Run Docker image on VPS
-        env:
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-        run: |
-          ssh -o StrictHostKeyChecking=no $VPS_USER@$SSH_HOST "docker run -d --rm -p 80:80 --v /usr/app/logs:/app/logs --restart unless-stopped tauras-backend:latest"
+      - name: Set permissions on tar file
+        run: chmod 644 tauras-backend.tar
+
+      - name: Upload Docker image tar as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauras-backend-tar
+          path: tauras-backend.tar
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download Docker image tar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tauras-backend-tar
+
+      - name: Check Docker image tar file
+        run: ls -l tauras-backend.tar
+
+      - name: Copy Docker image to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: 'tauras-backend.tar'
+          target: '~/tauras-backend.tar'
+
+      - name: Load and run Docker image on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker load -i ~/tauras-backend.tar
+            docker stop tauras-backend || true
+            docker rm tauras-backend || true
+            docker run -d --rm --name tauras-backend -p 80:80 -v /usr/app/logs:/app/logs --restart unless-stopped tauras-backend:latest
