@@ -56,7 +56,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: 'tauras-backend.tar'
-          target: '~/app/tauras-backend.tar'
+          target: '~/app/'
 
       - name: Load and run Docker image on VPS
         uses: appleboy/ssh-action@v1
@@ -67,6 +67,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd ~/app
+            ls -l tauras-backend.tar
             docker load -i tauras-backend.tar
             docker stop tauras-backend || true
             docker rm tauras-backend || true
