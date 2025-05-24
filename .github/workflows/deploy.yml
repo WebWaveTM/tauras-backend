@@ -71,4 +71,46 @@ jobs:
             docker load -i tauras-backend.tar
             docker stop tauras-backend || true
             docker rm tauras-backend || true
-            docker run -d --name tauras-backend -p 80:80 -v /usr/app/logs:/app/logs --restart unless-stopped tauras-backend:latest
+            docker run -d --name tauras-backend \
+              -p 80:80 \
+              -v /usr/app/logs:/app/logs \
+              --restart unless-stopped \
+              -e ACCESS_EXPIRES_IN=${{ vars.ACCESS_EXPIRES_IN }} \
+              -e ACCESS_PRIVATE_KEY=${{ secrets.ACCESS_PRIVATE_KEY }} \
+              -e ACCESS_PUBLIC_KEY=${{ secrets.ACCESS_PUBLIC_KEY }} \
+              -e REFRESH_EXPIRES_IN=${{ vars.REFRESH_EXPIRES_IN }} \
+              -e REFRESH_PRIVATE_KEY=${{ secrets.REFRESH_PRIVATE_KEY }} \
+              -e REFRESH_PUBLIC_KEY=${{ secrets.REFRESH_PUBLIC_KEY }} \
+              -e JWT_AUDIENCE=${{ vars.JWT_AUDIENCE }} \
+              -e JWT_ISSUER=${{ vars.JWT_ISSUER }} \
+              -e APP_PORT=${{ vars.APP_PORT }} \
+              -e BASE_URL=${{ vars.BASE_URL }} \
+              -e NODE_ENV=${{ vars.NODE_ENV }} \
+              -e LOG_LEVEL=${{ vars.LOG_LEVEL }} \
+              -e PASSWORD_HASH_SALT=${{ secrets.PASSWORD_HASH_SALT }} \
+              -e CORS_ORIGIN=${{ vars.CORS_ORIGIN }} \
+              -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
+              -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+              -e VERIFY_EMAIL_LINK=${{ vars.VERIFY_EMAIL_LINK }} \
+              -e VERIFY_EMAIL_PASSCODE_LIFETIME=${{ vars.VERIFY_EMAIL_PASSCODE_LIFETIME }} \
+              -e VERIFY_EMAIL_PASSCODE_RESEND_RATE=${{ vars.VERIFY_EMAIL_PASSCODE_RESEND_RATE }} \
+              -e RESTORE_PASSWORD_LINK=${{ vars.RESTORE_PASSWORD_LINK }} \
+              -e RESTORE_PASSWORD_TOKEN_LIFETIME=${{ vars.RESTORE_PASSWORD_TOKEN_LIFETIME }} \
+              -e DB_HOST=${{ secrets.DB_HOST }} \
+              -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e DB_NAME=${{ secrets.DB_NAME }} \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DATABASE_URL=postgresql://${{secrets.DB_USER}}:${{secrets.DB_PASSWORD}}@${{secrets.DB_HOST}}:${{secrets.DB_PORT}}/${{secrets.DB_NAME}} \
+              -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
+              -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
+              -e REDIS_USER=${{ secrets.REDIS_USER }} \
+              -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
+              -e MAIL_HOST=${{ secrets.MAIL_HOST }} \
+              -e MAIL_PORT=${{ secrets.MAIL_PORT }} \
+              -e MAIL_FROM=${{ vars.MAIL_FROM}} \
+              -e MAIL_USER=${{ secrets.MAIL_USER }} \
+              -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
+              -e MAIL_SECURE=${{ vars.MAIL_SECURE }} \
+              -e REDIS_URL=redis://${{secrets.REDIS_HOST}}:${{secrets.REDIS_PORT}} \
+              tauras-backend:latest
