@@ -49,10 +49,11 @@ jobs:
         run: ls -l tauras-backend.tar
 
       - name: Copy Docker image to VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: 'tauras-backend.tar'
           target: '~/tauras-backend.tar'
@@ -63,6 +64,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
           script: |
             docker load -i ~/tauras-backend.tar
             docker stop tauras-backend || true
