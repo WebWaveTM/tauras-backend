@@ -52,7 +52,7 @@ export class AuthController {
       httpOnly: true,
       maxAge: this.configService.get('REFRESH_EXPIRES_IN') * 1000,
       sameSite: 'none',
-      secure: this.configService.get('NODE_ENV') === 'production',
+      secure: this.configService.get('SECURE_COOKIE'),
     });
   }
 
@@ -60,7 +60,7 @@ export class AuthController {
     res.clearCookie(REFRESH_TOKEN_COOKIE, {
       httpOnly: true,
       sameSite: 'none',
-      secure: this.configService.get('NODE_ENV') === 'production',
+      secure: this.configService.get('SECURE_COOKIE'),
     });
   }
 

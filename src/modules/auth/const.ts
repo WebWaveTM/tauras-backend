@@ -18,7 +18,6 @@ export type Tokens = Record<'accessToken' | 'refreshToken', string>;
 export const BANNED_ACCESS_TOKEN_ID_REDIS_PREFIX = 'banned_access_token_id';
 export const ACCESS_TOKEN_STRATEGY_NAME = 'accessJwtStrategy';
 
-// Refresh token request property name (ex. req.refreshToken)
 export const REFRESH_TOKEN_PROPERTY = 'refreshToken';
 export const REFRESH_TOKEN_COOKIE = 'refresh-token';
 export const REFRESH_TOKEN_HASH_ROUNDS = 10;

@@ -77,6 +77,12 @@ export const ConfigSchema = z.object({
     .string()
     .transform((val) => +val)
     .pipe(z.number().int().min(0)),
+  SECURE_COOKIE: z
+    .string()
+    .transform((val) => val === 'true')
+    .pipe(z.boolean())
+    .optional()
+    .default('false'),
   VERIFY_EMAIL_LINK: z.string().url(),
   VERIFY_EMAIL_PASSCODE_LIFETIME: z
     .string()
