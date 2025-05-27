@@ -98,6 +98,7 @@ jobs:
               -p ${{ vars.APP_PORT }}:${{ vars.APP_PORT }} \
               -v ./logs:/usr/app/logs \
               -v ./keys:/usr/app/keys \
+              --network host \
               --restart unless-stopped \
               --env-file .env \
               tauras-backend:latest
